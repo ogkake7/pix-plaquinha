@@ -69,6 +69,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -84,17 +85,12 @@ button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ---------- painel do lojista ---------- */
-.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
 .brand svg { width: 30px; height: 30px; color: var(--accent); flex: none; }
-.tabs-m { display: none; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 12px; }
-.tabs-m button { border: 0; background: transparent; padding: 8px 14px; border-radius: 9px; font-weight: 600; font-size: 14px; color: var(--ink-2); }
-.tabs-m button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
 
-.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: 36px; align-items: start; }
 .setup { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.sample { margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); font-size: 14px; font-weight: 500; }
 .block { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .block h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 500; font-size: 15px; }
 .block h2 b { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; flex: none; }
@@ -114,26 +110,22 @@ button { cursor: pointer; }
 .chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 .linkbox { font-family: var(--f-mono); font-size: 13px; padding: 12px; border-radius: 10px; background: var(--field); border: 1px dashed var(--line); overflow-wrap: anywhere; user-select: all; }
 .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 16px; font-weight: 600; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
 .how { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--ink-2); }
 .how b { color: var(--ink); font-weight: 600; }
 
-.stage { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 16px; min-width: 0; }
-.stage-cap { margin: 0; font-size: 13px; color: var(--ink-2); text-align: center; }
-.phone { border: 9px solid #16211F; border-radius: 40px; background: var(--bg); overflow: hidden; box-shadow: 0 18px 40px -18px rgba(0,0,0,.45); }
-.screen { max-height: 740px; overflow-y: auto; }
+.phone { border: 8px solid #16211F; border-radius: 36px; background: var(--bg); overflow: hidden; box-shadow: 0 18px 40px -18px rgba(0,0,0,.45); }
+.screen { max-height: calc(100vh - 130px); overflow-y: auto; }
 .empty { margin: 0; padding: 48px 28px; text-align: center; color: var(--ink-2); font-size: 15px; }
 
-@media (max-width: 899px) {
-  .tabs-m { display: flex; }
-  .grid { grid-template-columns: minmax(0, 1fr); }
-  body[data-view="setup"] .stage { display: none; }
-  body[data-view="preview"] .setup { display: none; }
-  .stage { position: static; }
-  .phone { max-width: 420px; width: 100%; margin: 0 auto; border-width: 6px; border-radius: 30px; }
-  .screen { max-height: none; }
-}
+.modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(4, 18, 16, .88);
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.modal-box { width: min(100%, 420px); max-height: 100%; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.modal-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #E5F4F1; font-size: 14px; }
+.modal-bar span { min-width: 0; }
+.modal-bar .btn { flex: none; padding: 8px 14px; }
 
 /* ---------- página do cliente ---------- */
 .cv { display: flex; flex-direction: column; gap: 18px; padding: 26px 18px 28px; background: var(--bg); color: var(--ink); }
@@ -184,104 +176,98 @@ button { cursor: pointer; }
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M16 3l13 13-13 13L3 16z"/><path d="M16 10l6 6-6 6-6-6z"/></svg>
       <span>Pix na Plaquinha</span>
     </div>
-    <div class="tabs-m" role="tablist" aria-label="Alternar área">
-      <button type="button" role="tab" data-view="setup" aria-selected="true">Configurar</button>
-      <button type="button" role="tab" data-view="preview" aria-selected="false">Ver como cliente</button>
-    </div>
+    <button type="button" class="btn" id="open-preview">Ver como cliente</button>
   </header>
 
-  <div class="grid">
-    <section class="setup" id="setup" aria-label="Configuração do lojista">
-      <p class="sample" id="sample">Dados de exemplo. Troque pelos dados do seu estabelecimento.</p>
+  <section class="setup" id="setup" aria-label="Configuração do lojista">
+    <div class="block">
+      <h2><b>1</b>Chave Pix que vai na plaquinha</h2>
+      <div class="chips" role="radiogroup" aria-label="Tipo de chave">
+        <label class="chip"><input type="radio" name="ktype" value="cpf"><span>CPF</span></label>
+        <label class="chip"><input type="radio" name="ktype" value="cnpj"><span>CNPJ</span></label>
+        <label class="chip"><input type="radio" name="ktype" value="tel"><span>Celular</span></label>
+        <label class="chip"><input type="radio" name="ktype" value="email"><span>E-mail</span></label>
+        <label class="chip"><input type="radio" name="ktype" value="evp"><span>Chave aleatória</span></label>
+      </div>
+      <div class="field">
+        <label class="lbl" for="key">Chave</label>
+        <input class="input" id="key" type="text" autocomplete="off" spellcheck="false">
+        <p class="hint" id="key-hint"></p>
+      </div>
+    </div>
 
-      <div class="block">
-        <h2><b>1</b>Chave Pix que vai na plaquinha</h2>
-        <div class="chips" role="radiogroup" aria-label="Tipo de chave">
-          <label class="chip"><input type="radio" name="ktype" value="cpf"><span>CPF</span></label>
-          <label class="chip"><input type="radio" name="ktype" value="cnpj"><span>CNPJ</span></label>
-          <label class="chip"><input type="radio" name="ktype" value="tel"><span>Celular</span></label>
-          <label class="chip"><input type="radio" name="ktype" value="email"><span>E-mail</span></label>
-          <label class="chip"><input type="radio" name="ktype" value="evp"><span>Chave aleatória</span></label>
+    <div class="block">
+      <h2><b>2</b>Quem recebe</h2>
+      <div class="row2">
+        <div class="field">
+          <label class="lbl" for="estab">Nome do estabelecimento</label>
+          <input class="input" id="estab" type="text" maxlength="60" autocomplete="off" placeholder="Padaria Exemplo">
         </div>
         <div class="field">
-          <label class="lbl" for="key">Chave</label>
-          <input class="input" id="key" type="text" autocomplete="off" spellcheck="false">
-          <p class="hint" id="key-hint"></p>
+          <label class="lbl" for="name">Nome do recebedor <small>(igual ao do banco)</small></label>
+          <input class="input" id="name" type="text" maxlength="60" autocomplete="off" placeholder="Nome como aparece no banco">
+          <p class="hint err" id="name-hint" hidden></p>
         </div>
       </div>
+      <div class="field">
+        <label class="lbl" for="city">Cidade</label>
+        <input class="input" id="city" type="text" maxlength="40" autocomplete="off" placeholder="São Paulo">
+        <p class="hint err" id="city-hint" hidden></p>
+      </div>
+    </div>
 
-      <div class="block">
-        <h2><b>2</b>Quem recebe</h2>
-        <div class="row2">
-          <div class="field">
-            <label class="lbl" for="estab">Nome do estabelecimento</label>
-            <input class="input" id="estab" type="text" maxlength="60" autocomplete="off">
-          </div>
-          <div class="field">
-            <label class="lbl" for="name">Nome do recebedor <small>(igual ao do banco)</small></label>
-            <input class="input" id="name" type="text" maxlength="60" autocomplete="off">
-            <p class="hint err" id="name-hint" hidden></p>
-          </div>
+    <div class="block">
+      <h2><b>3</b>Valor e formato</h2>
+      <div class="chips" role="radiogroup" aria-label="Valor">
+        <label class="chip"><input type="radio" name="amode" value="open"><span>Cliente digita o valor</span></label>
+        <label class="chip"><input type="radio" name="amode" value="fixed"><span>Valor fixo</span></label>
+      </div>
+      <div class="field" id="amount-field" hidden>
+        <label class="lbl" for="amount">Valor (R$)</label>
+        <input class="input" id="amount" type="text" inputmode="decimal" placeholder="25,00" autocomplete="off">
+        <p class="hint err" id="amount-hint" hidden></p>
+      </div>
+      <div class="chips" role="radiogroup" aria-label="O que o cliente vê">
+        <label class="chip"><input type="radio" name="show" value="both"><span>Copia e cola + QR Code</span></label>
+        <label class="chip"><input type="radio" name="show" value="code"><span>Só copia e cola</span></label>
+        <label class="chip"><input type="radio" name="show" value="qr"><span>Só QR Code</span></label>
+      </div>
+      <div class="field">
+        <label class="lbl" for="msg">Mensagem no Pix <small>(opcional)</small></label>
+        <input class="input" id="msg" type="text" maxlength="40" placeholder="Mesa 4, Balcão, Pedido..." autocomplete="off">
+      </div>
+    </div>
+
+    <div class="block">
+      <h2><b>4</b>Salvar e link da plaquinha</h2>
+      <div class="row2">
+        <div class="field">
+          <label class="lbl" for="slug">Nome do seu link <small>(minúsculas, números e hífen)</small></label>
+          <input class="input" id="slug" type="text" maxlength="30" autocomplete="off" spellcheck="false" placeholder="padaria-exemplo">
+          <p class="hint err" id="slug-hint" hidden></p>
         </div>
         <div class="field">
-          <label class="lbl" for="city">Cidade</label>
-          <input class="input" id="city" type="text" maxlength="40" autocomplete="off">
-          <p class="hint err" id="city-hint" hidden></p>
+          <label class="lbl" for="pass">Senha do painel <small>(mínimo 6 caracteres)</small></label>
+          <input class="input" id="pass" type="password" autocomplete="current-password">
         </div>
       </div>
-
-      <div class="block">
-        <h2><b>3</b>Valor e formato</h2>
-        <div class="chips" role="radiogroup" aria-label="Valor">
-          <label class="chip"><input type="radio" name="amode" value="open"><span>Cliente digita o valor</span></label>
-          <label class="chip"><input type="radio" name="amode" value="fixed"><span>Valor fixo</span></label>
-        </div>
-        <div class="field" id="amount-field" hidden>
-          <label class="lbl" for="amount">Valor (R$)</label>
-          <input class="input" id="amount" type="text" inputmode="decimal" placeholder="25,00" autocomplete="off">
-          <p class="hint err" id="amount-hint" hidden></p>
-        </div>
-        <div class="chips" role="radiogroup" aria-label="O que o cliente vê">
-          <label class="chip"><input type="radio" name="show" value="both"><span>Copia e cola + QR Code</span></label>
-          <label class="chip"><input type="radio" name="show" value="code"><span>Só copia e cola</span></label>
-          <label class="chip"><input type="radio" name="show" value="qr"><span>Só QR Code</span></label>
-        </div>
-        <div class="field">
-          <label class="lbl" for="msg">Mensagem no Pix <small>(opcional)</small></label>
-          <input class="input" id="msg" type="text" maxlength="40" placeholder="Mesa 4, Balcão, Pedido..." autocomplete="off">
-        </div>
-      </div>
-
-      <div class="block">
-        <h2><b>4</b>Salvar e link da plaquinha</h2>
-        <div class="row2">
-          <div class="field">
-            <label class="lbl" for="slug">Nome do seu link <small>(minúsculas, números e hífen)</small></label>
-            <input class="input" id="slug" type="text" maxlength="30" autocomplete="off" spellcheck="false" placeholder="padaria-exemplo">
-            <p class="hint err" id="slug-hint" hidden></p>
-          </div>
-          <div class="field">
-            <label class="lbl" for="pass">Senha do painel <small>(mínimo 6 caracteres)</small></label>
-            <input class="input" id="pass" type="password" autocomplete="current-password">
-          </div>
-        </div>
-        <div><button type="button" class="btn primary" id="save">Salvar configurações</button></div>
-        <p class="hint" id="save-status" role="status" aria-live="polite">Primeiro acesso: escolha um nome e uma senha. Para alterar depois, digite o mesmo nome e a mesma senha.</p>
-        <p class="hint">Este é o link que você grava na plaquinha. Ele não muda quando você altera chave, valor ou formato. Depois de hospedar no Vercel, o endereço real do seu site aparece aqui sozinho.</p>
-        <div class="linkbox" id="link" aria-live="polite"></div>
-        <div><button type="button" class="btn" id="copy-link">Copiar link</button></div>
-        <ol class="how">
-          <li><b>Salve</b> as configurações e <b>copie o link</b> acima.</li>
-          <li>No celular, abra um app de gravação NFC (NFC Tools ou NFC TagWriter).</li>
-          <li>Grave como <b>URL / Link</b> em uma etiqueta NTAG213 ou NTAG215 e encoste o celular para testar.</li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="stage" aria-label="Prévia da página do cliente">
-      <p class="stage-cap">É isto que o cliente vê ao encostar na plaquinha</p>
+      <div class="actions"><button type="button" class="btn primary" id="save">Salvar configurações</button><button type="button" class="btn" id="open-preview-2">Ver como cliente</button></div>
+      <p class="hint" id="save-status" role="status" aria-live="polite">Primeiro acesso: escolha um nome e uma senha. Para alterar depois, digite o mesmo nome e a mesma senha.</p>
+      <p class="hint">Este é o link que você grava na plaquinha. Ele não muda quando você altera chave, valor ou formato. Depois de hospedar no Vercel, o endereço real do seu site aparece aqui sozinho.</p>
+      <div class="linkbox" id="link" aria-live="polite"></div>
+      <div><button type="button" class="btn" id="copy-link">Copiar link</button></div>
+      <ol class="how">
+        <li><b>Salve</b> as configurações e <b>copie o link</b> acima.</li>
+        <li>No celular, abra um app de gravação NFC (NFC Tools ou NFC TagWriter).</li>
+        <li>Grave como <b>URL / Link</b> em uma etiqueta NTAG213 ou NTAG215 e encoste o celular para testar.</li>
+      </ol>
+    </div>
+  </section>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Como o cliente vê" hidden>
+    <div class="modal-box">
+      <div class="modal-bar"><span id="modal-cap"></span><button type="button" class="btn" id="close-preview">Fechar</button></div>
       <div class="phone"><div class="screen" id="preview"></div></div>
-    </section>
+    </div>
   </div>
 </div>
 <div id="standalone" hidden></div>
@@ -607,14 +593,13 @@ button { cursor: pointer; }
   }
 
   /* ---------- painel do lojista ---------- */
-  var DEFAULT = {
-    type: "email", key: "pix@exemplo.com", estab: "Padaria Exemplo", name: "João da Silva", city: "São Paulo",
-    mode: "open", amount: "", show: "both", msg: ""
-  };
-  var model = Object.assign({}, DEFAULT), slug = "", touched = false;
+  var DEFAULT = { type: "email", key: "", estab: "", name: "", city: "", mode: "open", amount: "", show: "both", msg: "" };
+  var SAMPLE = { type: "email", key: "pix@exemplo.com", estab: "Padaria Exemplo", name: "João da Silva", city: "São Paulo", mode: "open", amount: "", show: "both", msg: "" };
+  var STORE = "pix-plaquinha-v2";
+  var model = Object.assign({}, DEFAULT), slug = "";
   try {
-    var saved = JSON.parse(localStorage.getItem("pix-plaquinha") || "null");
-    if (saved && saved.model) { model = Object.assign({}, DEFAULT, saved.model); slug = saved.slug || ""; touched = true; }
+    var saved = JSON.parse(localStorage.getItem(STORE) || "null");
+    if (saved && saved.model) { model = Object.assign({}, DEFAULT, saved.model); slug = saved.slug || ""; }
   } catch (e) {}
 
   function radio(name) { var el = $('input[name="' + name + '"]:checked'); return el ? el.value : ""; }
@@ -634,7 +619,7 @@ button { cursor: pointer; }
     if ($("#slug").value !== slug) $("#slug").value = slug;
   }
   function persist() {
-    try { localStorage.setItem("pix-plaquinha", JSON.stringify({ model: model, slug: slug })); } catch (e) {}
+    try { localStorage.setItem(STORE, JSON.stringify({ model: model, slug: slug })); } catch (e) {}
   }
   function hint(id, text) { var el = $("#" + id); el.hidden = !text; el.textContent = text || ""; }
   function status(text) { $("#save-status").textContent = text; }
@@ -642,7 +627,6 @@ button { cursor: pointer; }
   function refresh() {
     $("#amount-field").hidden = model.mode !== "fixed";
     $("#key").placeholder = TYPES[model.type].ph;
-    $("#sample").hidden = touched;
     var r = resolve(model);
     var kh = $("#key-hint");
     kh.textContent = r.errs.key || ("Será exibida como " + TYPES[model.type].label + ".");
@@ -652,12 +636,29 @@ button { cursor: pointer; }
     hint("slug-hint", slug && !slugOk ? "Use de 3 a 30 letras minúsculas, números ou hífen, sem começar nem terminar com hífen." : "");
     $("#link").textContent = baseUrl() + "?l=" + (slugOk ? slug : "nome-do-seu-link");
     $("#copy-link").disabled = !slugOk;
-    if (r.ok) {
-      mountCustomer($("#preview"), r.data);
-    } else {
-      clearInterval(clock);
-      $("#preview").innerHTML = '<p class="empty">Complete os dados ao lado para ver a página do cliente.</p>';
-    }
+    if (!$("#modal").hidden) renderPreview();
+  }
+
+  var opener = null;
+  function renderPreview() {
+    var r = resolve(model);
+    $("#modal-cap").textContent = r.ok
+      ? "É isto que o cliente vê ao encostar na plaquinha"
+      : "Exemplo com dados fictícios. Preencha os passos 1 a 3 para ver os seus.";
+    mountCustomer($("#preview"), r.ok ? r.data : resolve(SAMPLE).data);
+  }
+  function openPreview(from) {
+    opener = from || null;
+    renderPreview();
+    $("#modal").hidden = false;
+    document.body.style.overflow = "hidden";
+    $("#close-preview").focus();
+  }
+  function closePreview() {
+    $("#modal").hidden = true;
+    document.body.style.overflow = "";
+    clearInterval(clock);
+    if (opener) opener.focus();
   }
 
   function loadRemote() {
@@ -667,7 +668,7 @@ button { cursor: pointer; }
       if (asked !== slug) return;
       if (res.status === 200 && res.body.config) {
         model = Object.assign({}, DEFAULT, res.body.config);
-        touched = true; toForm(); persist(); refresh();
+        toForm(); persist(); refresh();
         status("Configurações deste link carregadas. Para alterar, digite a senha e salve.");
       } else if (res.status === 404) {
         status("Este nome está livre. Preencha os passos 1 a 3, escolha uma senha e salve.");
@@ -701,7 +702,7 @@ button { cursor: pointer; }
   }
 
   $("#setup").addEventListener("input", function () {
-    touched = true; fromForm(); persist(); refresh();
+    fromForm(); persist(); refresh();
   });
   $("#slug").addEventListener("change", loadRemote);
   $("#save").addEventListener("click", save);
@@ -712,14 +713,14 @@ button { cursor: pointer; }
       if (!ok) selectNode($("#link"));
     });
   });
-  $$(".tabs-m button").forEach(function (b) {
-    b.addEventListener("click", function () {
-      document.body.dataset.view = b.dataset.view;
-      $$(".tabs-m button").forEach(function (x) { x.setAttribute("aria-selected", x === b ? "true" : "false"); });
-    });
+  ["open-preview", "open-preview-2"].forEach(function (id) {
+    var b = $("#" + id);
+    b.addEventListener("click", function () { openPreview(b); });
   });
+  $("#close-preview").addEventListener("click", closePreview);
+  $("#modal").addEventListener("click", function (e) { if (e.target === this) closePreview(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("#modal").hidden) closePreview(); });
 
-  document.body.dataset.view = "setup";
   toForm();
   refresh();
   loadRemote();
