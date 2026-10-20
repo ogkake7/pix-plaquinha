@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}</style>
+</head>
+<body>
+<title>Pix na Plaquinha</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: à esquerda o painel do lojista (chave, recebedor, valor, link da plaquinha);
+   à direita um celular com a página exata que o cliente abre ao encostar na plaquinha.
+   No celular do lojista, as duas áreas viram abas. Com ?k=...&n=... na URL, só a página do cliente aparece. */
+:root {
+  --bg: #EDF2F1;
+  --surface: #FFFFFF;
+  --surface-2: #E1EAE8;
+  --field: #F5F9F8;
+  --ink: #0D2624;
+  --ink-2: #48625F;
+  --line: #C9D8D5;
+  --accent: #087F73;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #D2EEEA;
+  --warn: #6E4600;
+  --warn-bg: #FBEFD2;
+  --err: #B3261E;
+  --f-display: "Unbounded", "Trebuchet MS", system-ui, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #071514;
+    --surface: #0E2321;
+    --surface-2: #153331;
+    --field: #0A1B19;
+    --ink: #E5F4F1;
+    --ink-2: #92B1AD;
+    --line: #1E403C;
+    --accent: #3FD8C4;
+    --accent-ink: #04201D;
+    --accent-soft: #11403A;
+    --warn: #F2C45E;
+    --warn-bg: #352A0B;
+    --err: #FF9088;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #071514;
+  --surface: #0E2321;
+  --surface-2: #153331;
+  --field: #0A1B19;
+  --ink: #E5F4F1;
+  --ink-2: #92B1AD;
+  --line: #1E403C;
+  --accent: #3FD8C4;
+  --accent-ink: #04201D;
+  --accent-soft: #11403A;
+  --warn: #F2C45E;
+  --warn-bg: #352A0B;
+  --err: #FF9088;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- painel do lojista ---------- */
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+.brand svg { width: 30px; height: 30px; color: var(--accent); flex: none; }
+.tabs-m { display: none; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 12px; }
+.tabs-m button { border: 0; background: transparent; padding: 8px 14px; border-radius: 9px; font-weight: 600; font-size: 14px; color: var(--ink-2); }
+.tabs-m button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: 36px; align-items: start; }
+.setup { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.sample { margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); font-size: 14px; font-weight: 500; }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.block h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 500; font-size: 15px; }
+.block h2 b { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; flex: none; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lbl { font-size: 13px; font-weight: 600; }
+.lbl small { font-weight: 400; color: var(--ink-2); }
+.input { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--field); border-radius: 10px; padding: 11px 12px; }
+.input:focus-visible { outline-offset: 0; border-color: var(--accent); }
+.hint { margin: 0; font-size: 13px; color: var(--ink-2); }
+.hint.err { color: var(--err); font-weight: 500; }
+.row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chip span { display: block; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--field); font-size: 14px; font-weight: 600; color: var(--ink-2); }
+.chip input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.linkbox { font-family: var(--f-mono); font-size: 13px; padding: 12px; border-radius: 10px; background: var(--field); border: 1px dashed var(--line); overflow-wrap: anywhere; user-select: all; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 16px; font-weight: 600; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.how { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--ink-2); }
+.how b { color: var(--ink); font-weight: 600; }
+
+.stage { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 16px; min-width: 0; }
+.stage-cap { margin: 0; font-size: 13px; color: var(--ink-2); text-align: center; }
+.phone { border: 9px solid #16211F; border-radius: 40px; background: var(--bg); overflow: hidden; box-shadow: 0 18px 40px -18px rgba(0,0,0,.45); }
+.screen { max-height: 740px; overflow-y: auto; }
+.empty { margin: 0; padding: 48px 28px; text-align: center; color: var(--ink-2); font-size: 15px; }
+
+@media (max-width: 899px) {
+  .tabs-m { display: flex; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  body[data-view="setup"] .stage { display: none; }
+  body[data-view="preview"] .setup { display: none; }
+  .stage { position: static; }
+  .phone { max-width: 420px; width: 100%; margin: 0 auto; border-width: 6px; border-radius: 30px; }
+  .screen { max-height: none; }
+}
+
+/* ---------- página do cliente ---------- */
+.cv { display: flex; flex-direction: column; gap: 18px; padding: 26px 18px 28px; background: var(--bg); color: var(--ink); }
+.cv-head { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.rings { width: 46px; height: 46px; color: var(--accent); }
+.rings path { opacity: .25; animation: ping 2.4s ease-in-out infinite; }
+.rings path:nth-child(2) { animation-delay: .25s; }
+.rings path:nth-child(3) { animation-delay: .5s; }
+@keyframes ping { 0%, 100% { opacity: .25; } 40% { opacity: 1; } }
+.eyebrow { margin: 6px 0 0; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.cv h1 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 25px; line-height: 1.15; letter-spacing: -0.02em; text-wrap: balance; overflow-wrap: anywhere; }
+.amount-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.lbl2 { margin: 0; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.amount { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 34px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.money { display: flex; align-items: baseline; gap: 8px; font-family: var(--f-display); font-weight: 700; font-size: 34px; letter-spacing: -0.02em; border-radius: 10px; }
+.money:focus-within { outline: 2px solid var(--accent); outline-offset: 4px; }
+.money span { color: var(--ink-2); font-size: 22px; font-weight: 500; }
+.money input { border: 0; background: transparent; outline: none; width: 100%; min-width: 0; font: inherit; font-variant-numeric: tabular-nums; }
+.money input::placeholder { color: var(--line); }
+.facts { margin: 0; display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--line); }
+.facts > div { display: flex; flex-direction: column; gap: 2px; padding: 11px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.facts dt { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.facts dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.facts dd.mono { font-family: var(--f-mono); font-weight: 500; font-size: 15px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 12px; }
+.seg button { border: 0; background: transparent; padding: 9px 10px; border-radius: 9px; font-weight: 600; font-size: 14px; color: var(--ink-2); }
+.seg button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.14); }
+.panel { display: flex; flex-direction: column; gap: 12px; }
+.code { font-family: var(--f-mono); font-size: 12px; line-height: 1.5; padding: 12px; border-radius: 12px; background: var(--surface); border: 1px dashed var(--line); overflow-wrap: anywhere; max-height: 104px; overflow-y: auto; user-select: all; }
+.btn-main { width: 100%; border: 0; padding: 16px; border-radius: 14px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 16px; }
+.btn-sub { width: 100%; border: 1px solid var(--line); padding: 12px; border-radius: 12px; background: transparent; font-weight: 600; font-size: 14px; }
+.qr { align-self: center; width: min(100%, 260px); padding: 10px; border-radius: 16px; background: #fff; }
+.qr svg { display: block; width: 100%; height: auto; }
+.qr-cap { margin: 0; text-align: center; font-size: 14px; color: var(--ink-2); }
+.keyline { text-align: center; font-size: 14px; max-height: none; }
+.steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--ink-2); }
+.note { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--warn-bg); color: var(--warn); font-size: 14px; font-weight: 500; }
+#standalone .cv { max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rings path { animation: none; opacity: 1; }
+}
+</style>
+
+<div class="wrap" id="shell">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M16 3l13 13-13 13L3 16z"/><path d="M16 10l6 6-6 6-6-6z"/></svg>
+      <span>Pix na Plaquinha</span>
+    </div>
+    <div class="tabs-m" role="tablist" aria-label="Alternar área">
+      <button type="button" role="tab" data-view="setup" aria-selected="true">Configurar</button>
+      <button type="button" role="tab" data-view="preview" aria-selected="false">Ver como cliente</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="setup" id="setup" aria-label="Configuração do lojista">
+      <p class="sample" id="sample">Dados de exemplo. Troque pelos dados do seu estabelecimento.</p>
+
+      <div class="block">
+        <h2><b>1</b>Chave Pix que vai na plaquinha</h2>
+        <div class="chips" role="radiogroup" aria-label="Tipo de chave">
+          <label class="chip"><input type="radio" name="ktype" value="cpf"><span>CPF</span></label>
+          <label class="chip"><input type="radio" name="ktype" value="cnpj"><span>CNPJ</span></label>
+          <label class="chip"><input type="radio" name="ktype" value="tel"><span>Celular</span></label>
+          <label class="chip"><input type="radio" name="ktype" value="email"><span>E-mail</span></label>
+          <label class="chip"><input type="radio" name="ktype" value="evp"><span>Chave aleatória</span></label>
+        </div>
+        <div class="field">
+          <label class="lbl" for="key">Chave</label>
+          <input class="input" id="key" type="text" autocomplete="off" spellcheck="false">
+          <p class="hint" id="key-hint"></p>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2><b>2</b>Quem recebe</h2>
+        <div class="row2">
+          <div class="field">
+            <label class="lbl" for="estab">Nome do estabelecimento</label>
+            <input class="input" id="estab" type="text" maxlength="60" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="lbl" for="name">Nome do recebedor <small>(igual ao do banco)</small></label>
+            <input class="input" id="name" type="text" maxlength="60" autocomplete="off">
+            <p class="hint err" id="name-hint" hidden></p>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl" for="city">Cidade</label>
+          <input class="input" id="city" type="text" maxlength="40" autocomplete="off">
+          <p class="hint err" id="city-hint" hidden></p>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2><b>3</b>Valor e formato</h2>
+        <div class="chips" role="radiogroup" aria-label="Valor">
+          <label class="chip"><input type="radio" name="amode" value="open"><span>Cliente digita o valor</span></label>
+          <label class="chip"><input type="radio" name="amode" value="fixed"><span>Valor fixo</span></label>
+        </div>
+        <div class="field" id="amount-field" hidden>
+          <label class="lbl" for="amount">Valor (R$)</label>
+          <input class="input" id="amount" type="text" inputmode="decimal" placeholder="25,00" autocomplete="off">
+          <p class="hint err" id="amount-hint" hidden></p>
+        </div>
+        <div class="chips" role="radiogroup" aria-label="O que o cliente vê">
+          <label class="chip"><input type="radio" name="show" value="both"><span>Copia e cola + QR Code</span></label>
+          <label class="chip"><input type="radio" name="show" value="code"><span>Só copia e cola</span></label>
+          <label class="chip"><input type="radio" name="show" value="qr"><span>Só QR Code</span></label>
+        </div>
+        <div class="field">
+          <label class="lbl" for="msg">Mensagem no Pix <small>(opcional)</small></label>
+          <input class="input" id="msg" type="text" maxlength="40" placeholder="Mesa 4, Balcão, Pedido..." autocomplete="off">
+        </div>
+      </div>
+
+      <div class="block">
+        <h2><b>4</b>Salvar e link da plaquinha</h2>
+        <div class="row2">
+          <div class="field">
+            <label class="lbl" for="slug">Nome do seu link <small>(minúsculas, números e hífen)</small></label>
+            <input class="input" id="slug" type="text" maxlength="30" autocomplete="off" spellcheck="false" placeholder="padaria-exemplo">
+            <p class="hint err" id="slug-hint" hidden></p>
+          </div>
+          <div class="field">
+            <label class="lbl" for="pass">Senha do painel <small>(mínimo 6 caracteres)</small></label>
+            <input class="input" id="pass" type="password" autocomplete="current-password">
+          </div>
+        </div>
+        <div><button type="button" class="btn primary" id="save">Salvar configurações</button></div>
+        <p class="hint" id="save-status" role="status" aria-live="polite">Primeiro acesso: escolha um nome e uma senha. Para alterar depois, digite o mesmo nome e a mesma senha.</p>
+        <p class="hint">Este é o link que você grava na plaquinha. Ele não muda quando você altera chave, valor ou formato. Depois de hospedar no Vercel, o endereço real do seu site aparece aqui sozinho.</p>
+        <div class="linkbox" id="link" aria-live="polite"></div>
+        <div><button type="button" class="btn" id="copy-link">Copiar link</button></div>
+        <ol class="how">
+          <li><b>Salve</b> as configurações e <b>copie o link</b> acima.</li>
+          <li>No celular, abra um app de gravação NFC (NFC Tools ou NFC TagWriter).</li>
+          <li>Grave como <b>URL / Link</b> em uma etiqueta NTAG213 ou NTAG215 e encoste o celular para testar.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="stage" aria-label="Prévia da página do cliente">
+      <p class="stage-cap">É isto que o cliente vê ao encostar na plaquinha</p>
+      <div class="phone"><div class="screen" id="preview"></div></div>
+    </section>
+  </div>
+</div>
+<div id="standalone" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  };
+  var BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
+  /* ---------- tipos de chave ---------- */
+  var TYPES = {
+    cpf:   { label: "CPF",             ph: "000.000.000-00" },
+    cnpj:  { label: "CNPJ",            ph: "00.000.000/0000-00" },
+    tel:   { label: "Celular",         ph: "(11) 99999-9999" },
+    email: { label: "E-mail",          ph: "voce@email.com" },
+    evp:   { label: "Chave aleatória", ph: "123e4567-e89b-12d3-a456-426614174000" }
+  };
+
+  function validCPF(s) {
+    if (s.length !== 11 || /^(\d)\1+$/.test(s)) return false;
+    for (var t = 9; t < 11; t++) {
+      var sum = 0;
+      for (var i = 0; i < t; i++) sum += +s[i] * (t + 1 - i);
+      if (((sum * 10) % 11) % 10 !== +s[t]) return false;
+    }
+    return true;
+  }
+  function validCNPJ(s) {
+    if (s.length !== 14 || /^(\d)\1+$/.test(s)) return false;
+    function dv(n) {
+      var w = n === 12 ? [5,4,3,2,9,8,7,6,5,4,3,2] : [6,5,4,3,2,9,8,7,6,5,4,3,2];
+      var sum = 0;
+      for (var i = 0; i < n; i++) sum += +s[i] * w[i];
+      var r = sum % 11;
+      return r < 2 ? 0 : 11 - r;
+    }
+    return dv(12) === +s[12] && dv(13) === +s[13];
+  }
+
+  function validateKey(type, raw) {
+    var v = String(raw || "").trim();
+    var d = v.replace(/\D/g, "");
+    if (!v) return { ok: false, msg: "Informe a chave Pix." };
+    if (type === "cpf") {
+      if (!validCPF(d)) return { ok: false, msg: "CPF inválido. Confira os 11 dígitos." };
+      return { ok: true, value: d, copy: d, display: d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") };
+    }
+    if (type === "cnpj") {
+      if (!validCNPJ(d)) return { ok: false, msg: "CNPJ inválido. Confira os 14 dígitos." };
+      return { ok: true, value: d, copy: d, display: d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5") };
+    }
+    if (type === "tel") {
+      if ((d.length === 12 || d.length === 13) && d.slice(0, 2) === "55") d = d.slice(2);
+      if (d.length !== 10 && d.length !== 11) return { ok: false, msg: "Celular com DDD, 10 ou 11 dígitos." };
+      var disp = d.length === 11
+        ? d.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3")
+        : d.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+      return { ok: true, value: "+55" + d, copy: "+55" + d, display: disp };
+    }
+    if (type === "email") {
+      var e = v.toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) || e.length > 77) return { ok: false, msg: "E-mail inválido." };
+      return { ok: true, value: e, copy: e, display: e };
+    }
+    var u = v.toLowerCase();
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(u)) return { ok: false, msg: "A chave aleatória tem 36 caracteres, com hífens." };
+    return { ok: true, value: u, copy: u, display: u };
+  }
+
+  /* ---------- Pix copia e cola (BR Code estático) ---------- */
+  function tlv(id, val) { return id + ("0" + val.length).slice(-2) + val; }
+  function ascii(s, max, upper) {
+    var t = String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9 .\-]/g, "").replace(/\s+/g, " ").trim();
+    if (upper) t = t.toUpperCase();
+    return t.slice(0, max);
+  }
+  function crc16(str) {
+    var crc = 0xFFFF;
+    for (var i = 0; i < str.length; i++) {
+      crc ^= str.charCodeAt(i) << 8;
+      for (var j = 0; j < 8; j++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+    }
+    return ("000" + crc.toString(16).toUpperCase()).slice(-4);
+  }
+  function buildPix(o) {
+    var mai = tlv("00", "br.gov.bcb.pix") + tlv("01", o.key);
+    var room = 99 - mai.length - 4;
+    var msg = ascii(o.msg || "", Math.min(40, Math.max(room, 0)), false);
+    if (msg) mai += tlv("02", msg);
+    var p = tlv("00", "01") + tlv("01", "11") + tlv("26", mai) + tlv("52", "0000") + tlv("53", "986");
+    if (o.amount > 0) p += tlv("54", o.amount.toFixed(2));
+    p += tlv("58", "BR") + tlv("59", ascii(o.name, 25, true) || "RECEBEDOR") + tlv("60", ascii(o.city, 15, true) || "BRASIL");
+    p += tlv("62", tlv("05", "***"));
+    p += "6304";
+    return p + crc16(p);
+  }
+
+  function qrSvg(text) {
+    if (typeof window.qrcode !== "function") return '<p class="qr-cap">Não foi possível gerar o QR Code. Use o Pix copia e cola.</p>';
+    var qr = window.qrcode(0, "M");
+    qr.addData(text);
+    qr.make();
+    var n = qr.getModuleCount(), d = "";
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (qr.isDark(r, c)) d += "M" + c + " " + r + "h1v1h-1z";
+    var s = n + 4;
+    return '<svg viewBox="-2 -2 ' + s + " " + s + '" shape-rendering="crispEdges" role="img" aria-label="QR Code do Pix"><rect x="-2" y="-2" width="' + s + '" height="' + s + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>';
+  }
+
+  function parseMoney(s) {
+    s = String(s || "").replace(/[^\d,.]/g, "");
+    if (!s) return 0;
+    if (s.indexOf(",") > -1) s = s.replace(/\./g, "").replace(",", ".");
+    else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, "");
+    var n = Math.round(parseFloat(s) * 100) / 100;
+    return isFinite(n) && n > 0 && n <= 9999999.99 ? n : 0;
+  }
+
+  /* ---------- copiar ---------- */
+  function selectNode(el) {
+    try {
+      var r = document.createRange(); r.selectNodeContents(el);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    } catch (e) {}
+  }
+  function copyText(text) {
+    function legacy() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.setAttribute("readonly", "");
+        ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+        document.body.appendChild(ta); ta.select();
+        var ok = document.execCommand("copy");
+        ta.remove();
+        return ok;
+      } catch (e) { return false; }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return legacy(); });
+    }
+    return Promise.resolve(legacy());
+  }
+  function flash(btn, okText, failText, ok) {
+    var old = btn.dataset.label || (btn.dataset.label = btn.textContent);
+    btn.textContent = ok ? okText : failText;
+    clearTimeout(btn._t);
+    btn._t = setTimeout(function () { btn.textContent = old; }, 2200);
+  }
+
+  /* ---------- validação do modelo do lojista ---------- */
+  function resolve(m) {
+    var errs = {};
+    var k = validateKey(m.type, m.key);
+    if (!k.ok) errs.key = k.msg;
+    var name = String(m.name || "").trim();
+    if (name.length < 2) errs.name = "Informe o nome de quem recebe.";
+    var city = String(m.city || "").trim();
+    if (city.length < 2) errs.city = "Informe a cidade.";
+    var fixed = 0;
+    if (m.mode === "fixed") {
+      fixed = parseMoney(m.amount);
+      if (!(fixed > 0)) errs.amount = "Informe um valor maior que zero.";
+    }
+    var ok = Object.keys(errs).length === 0;
+    return {
+      ok: ok, errs: errs,
+      data: ok ? {
+        type: m.type, typeLabel: TYPES[m.type].label,
+        keyValue: k.value, keyCopy: k.copy, keyDisplay: k.display,
+        name: name, city: city,
+        estab: String(m.estab || "").trim() || name,
+        show: ["both", "code", "qr"].indexOf(m.show) > -1 ? m.show : "both",
+        fixed: fixed, msg: String(m.msg || "").trim()
+      } : null
+    };
+  }
+
+  /* ---------- página do cliente ---------- */
+  var RINGS = '<svg class="rings" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M18 17a10 10 0 0 1 0 14"/><path d="M25 12a17 17 0 0 1 0 24"/><path d="M32 7a24 24 0 0 1 0 34"/></svg>';
+  var clock = null;
+
+  function mountCustomer(root, d) {
+    clearInterval(clock);
+    var amount = d.fixed || 0;
+    var both = d.show === "both";
+    var showCode = d.show !== "qr";
+    root.innerHTML =
+      '<article class="cv">' +
+        '<header class="cv-head">' + RINGS +
+          '<p class="eyebrow">Pagamento via Pix</p>' +
+          '<h1>' + esc(d.estab) + '</h1>' +
+        '</header>' +
+        '<section class="amount-card">' +
+          (d.fixed
+            ? '<p class="lbl2">Valor a pagar</p><p class="amount">' + esc(BRL.format(d.fixed)) + '</p>'
+            : '<label class="lbl2" for="cv-amt">Valor a pagar</label>' +
+              '<div class="money"><span>R$</span><input id="cv-amt" data-amt inputmode="decimal" autocomplete="off" placeholder="0,00"></div>' +
+              '<p class="hint">Opcional. Sem valor, você digita no app do banco.</p>') +
+        '</section>' +
+        '<dl class="facts">' +
+          '<div><dt>Recebedor</dt><dd>' + esc(d.name) + '</dd></div>' +
+          '<div><dt>Chave Pix · ' + esc(d.typeLabel) + '</dt><dd class="mono">' + esc(d.keyDisplay) + '</dd></div>' +
+          '<div><dt>Cidade</dt><dd>' + esc(d.city) + '</dd></div>' +
+          '<div><dt>Horário</dt><dd data-time></dd></div>' +
+        '</dl>' +
+        (both ? '<div class="seg" role="tablist"><button type="button" role="tab" data-tab="code" aria-selected="true">Copia e cola</button><button type="button" role="tab" data-tab="qr" aria-selected="false">QR Code</button></div>' : '') +
+        '<section class="panel" data-panel="code"' + (showCode ? '' : ' hidden') + '>' +
+          '<div class="code" data-code tabindex="0" aria-label="Pix copia e cola"></div>' +
+          '<button type="button" class="btn-main" data-copy-code>Copiar Pix copia e cola</button>' +
+          '<button type="button" class="btn-sub" data-copy-key>Copiar só a chave</button>' +
+        '</section>' +
+        '<section class="panel" data-panel="qr"' + (d.show === "code" || both ? ' hidden' : '') + '>' +
+          '<div class="qr" data-qr></div>' +
+          '<p class="qr-cap">Abra o app do seu banco e leia este QR Code.</p>' +
+          '<p class="qr-cap">O QR Code não leu? Copie a chave Pix e cole no app do banco:</p>' +
+          '<div class="code keyline">' + esc(d.keyDisplay) + '</div>' +
+          '<button type="button" class="btn-main" data-copy-key>Copiar chave Pix</button>' +
+        '</section>' +
+        '<ol class="steps">' +
+          '<li>Abra o app do seu banco e vá em Pix.</li>' +
+          '<li>Escolha <b>Pix copia e cola</b> ou <b>Ler QR Code</b>.</li>' +
+          '<li>Confira os dados e confirme o pagamento.</li>' +
+        '</ol>' +
+        '<p class="note">Antes de confirmar, veja se o nome do recebedor no app do banco é o mesmo que aparece aqui.</p>' +
+      '</article>';
+
+    var codeEl = $("[data-code]", root), qrEl = $("[data-qr]", root), timeEl = $("[data-time]", root);
+    var current = "";
+    function update() {
+      current = buildPix({ key: d.keyValue, name: d.name, city: d.city, amount: amount, msg: d.msg });
+      codeEl.textContent = current;
+      qrEl.innerHTML = qrSvg(current);
+    }
+    function tick() {
+      var n = new Date();
+      timeEl.textContent = n.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) + " · " +
+        n.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
+    }
+    update(); tick();
+    clock = setInterval(tick, 20000);
+
+    var amt = $("[data-amt]", root);
+    if (amt) amt.addEventListener("input", function () {
+      amt.value = amt.value.replace(/[^\d,.]/g, "");
+      amount = parseMoney(amt.value);
+      update();
+    });
+    $$("[data-tab]", root).forEach(function (b) {
+      b.addEventListener("click", function () {
+        $$("[data-tab]", root).forEach(function (x) { x.setAttribute("aria-selected", x === b ? "true" : "false"); });
+        $("[data-panel=code]", root).hidden = b.dataset.tab !== "code";
+        $("[data-panel=qr]", root).hidden = b.dataset.tab !== "qr";
+      });
+    });
+    var bc = $("[data-copy-code]", root);
+    if (bc) bc.addEventListener("click", function () {
+      copyText(current).then(function (ok) {
+        flash(bc, "Copiado! Cole no app do banco", "Selecione o texto e copie", ok);
+        if (!ok) selectNode(codeEl);
+      });
+    });
+    $$("[data-copy-key]", root).forEach(function (bk) {
+      bk.addEventListener("click", function () {
+        copyText(d.keyCopy).then(function (ok) {
+          flash(bk, "Chave copiada! Cole no app do banco", "Selecione a chave e copie", ok);
+          if (!ok) { var kl = bk.parentNode.querySelector(".keyline"); if (kl) selectNode(kl); }
+        });
+      });
+    });
+  }
+
+  /* ---------- API ---------- */
+  var SLUG_RE = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/;
+  function api(method, slug, body) {
+    var opts = { method: method, headers: {} };
+    if (body) { opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(body); }
+    var url = "/api/lojista" + (method === "GET" ? "?l=" + encodeURIComponent(slug) : "");
+    return fetch(url, opts).then(function (r) {
+      return r.json().then(function (j) { return { status: r.status, body: j || {} }; },
+                           function () { return { status: r.status, body: {} }; });
+    });
+  }
+  function baseUrl() {
+    try {
+      if (/^https?:$/.test(window.location.protocol) && window.location.origin !== "null") {
+        return window.location.origin + window.location.pathname.replace(/index\.html$/, "");
+      }
+    } catch (e) {}
+    return "https://seu-site.vercel.app/";
+  }
+
+  /* ---------- modo cliente (link fixo da plaquinha: /?l=nome) ---------- */
+  var qp = null;
+  try { qp = new URLSearchParams(window.location.search); } catch (e) {}
+  var slugParam = qp ? String(qp.get("l") || "").toLowerCase() : "";
+  if (slugParam) {
+    $("#shell").hidden = true;
+    var sa = $("#standalone"); sa.hidden = false;
+    var fail = function (title, msg) {
+      sa.innerHTML = '<article class="cv"><h1>' + esc(title) + '</h1><p class="note">' + esc(msg) + '</p></article>';
+    };
+    sa.innerHTML = '<article class="cv"><p class="lbl2">Carregando o pagamento...</p></article>';
+    if (!SLUG_RE.test(slugParam)) { fail("Link inválido", "Peça ao estabelecimento para conferir o link da plaquinha."); return; }
+    api("GET", slugParam).then(function (res) {
+      if (res.status === 200 && res.body.config) {
+        var r = resolve(res.body.config);
+        if (r.ok) { document.title = r.data.estab + " · Pix"; mountCustomer(sa, r.data); return; }
+        fail("Pagamento indisponível", "Os dados do estabelecimento estão incompletos. Avise o lojista.");
+      } else if (res.status === 404) {
+        fail("Plaquinha não configurada", "Este link ainda não foi configurado pelo estabelecimento.");
+      } else {
+        fail("Não foi possível carregar", "Verifique sua conexão e encoste na plaquinha de novo.");
+      }
+    }, function () { fail("Não foi possível carregar", "Verifique sua conexão e encoste na plaquinha de novo."); });
+    return;
+  }
+
+  /* ---------- painel do lojista ---------- */
+  var DEFAULT = {
+    type: "email", key: "pix@exemplo.com", estab: "Padaria Exemplo", name: "João da Silva", city: "São Paulo",
+    mode: "open", amount: "", show: "both", msg: ""
+  };
+  var model = Object.assign({}, DEFAULT), slug = "", touched = false;
+  try {
+    var saved = JSON.parse(localStorage.getItem("pix-plaquinha") || "null");
+    if (saved && saved.model) { model = Object.assign({}, DEFAULT, saved.model); slug = saved.slug || ""; touched = true; }
+  } catch (e) {}
+
+  function radio(name) { var el = $('input[name="' + name + '"]:checked'); return el ? el.value : ""; }
+  function setRadio(name, val) { $$('input[name="' + name + '"]').forEach(function (i) { i.checked = i.value === val; }); }
+  function toForm() {
+    setRadio("ktype", model.type); setRadio("amode", model.mode); setRadio("show", model.show);
+    ["key", "estab", "name", "city", "amount", "msg"].forEach(function (id) { $("#" + id).value = model[id] || ""; });
+    $("#slug").value = slug;
+  }
+  function fromForm() {
+    model = {
+      type: radio("ktype"), mode: radio("amode"), show: radio("show"),
+      key: $("#key").value, estab: $("#estab").value, name: $("#name").value, city: $("#city").value,
+      amount: $("#amount").value, msg: $("#msg").value
+    };
+    slug = $("#slug").value.trim().toLowerCase().replace(/\s+/g, "-");
+    if ($("#slug").value !== slug) $("#slug").value = slug;
+  }
+  function persist() {
+    try { localStorage.setItem("pix-plaquinha", JSON.stringify({ model: model, slug: slug })); } catch (e) {}
+  }
+  function hint(id, text) { var el = $("#" + id); el.hidden = !text; el.textContent = text || ""; }
+  function status(text) { $("#save-status").textContent = text; }
+
+  function refresh() {
+    $("#amount-field").hidden = model.mode !== "fixed";
+    $("#key").placeholder = TYPES[model.type].ph;
+    $("#sample").hidden = touched;
+    var r = resolve(model);
+    var kh = $("#key-hint");
+    kh.textContent = r.errs.key || ("Será exibida como " + TYPES[model.type].label + ".");
+    kh.className = "hint" + (r.errs.key ? " err" : "");
+    hint("name-hint", r.errs.name); hint("city-hint", r.errs.city); hint("amount-hint", r.errs.amount);
+    var slugOk = SLUG_RE.test(slug);
+    hint("slug-hint", slug && !slugOk ? "Use de 3 a 30 letras minúsculas, números ou hífen, sem começar nem terminar com hífen." : "");
+    $("#link").textContent = baseUrl() + "?l=" + (slugOk ? slug : "nome-do-seu-link");
+    $("#copy-link").disabled = !slugOk;
+    if (r.ok) {
+      mountCustomer($("#preview"), r.data);
+    } else {
+      clearInterval(clock);
+      $("#preview").innerHTML = '<p class="empty">Complete os dados ao lado para ver a página do cliente.</p>';
+    }
+  }
+
+  function loadRemote() {
+    if (!SLUG_RE.test(slug)) return;
+    var asked = slug;
+    api("GET", asked).then(function (res) {
+      if (asked !== slug) return;
+      if (res.status === 200 && res.body.config) {
+        model = Object.assign({}, DEFAULT, res.body.config);
+        touched = true; toForm(); persist(); refresh();
+        status("Configurações deste link carregadas. Para alterar, digite a senha e salve.");
+      } else if (res.status === 404) {
+        status("Este nome está livre. Preencha os passos 1 a 3, escolha uma senha e salve.");
+      }
+    }, function () {});
+  }
+
+  function save() {
+    fromForm();
+    var r = resolve(model), pass = $("#pass").value;
+    if (!r.ok) { status("Complete os passos 1 a 3 antes de salvar."); refresh(); return; }
+    if (!SLUG_RE.test(slug)) { status("Escolha o nome do seu link."); refresh(); return; }
+    if (pass.length < 6) { status("A senha precisa ter pelo menos 6 caracteres."); return; }
+    var btn = $("#save"); btn.disabled = true; status("Salvando...");
+    api("POST", slug, { slug: slug, pass: pass, config: model }).then(function (res) {
+      btn.disabled = false;
+      if (res.status === 200) {
+        persist();
+        status(res.body.created
+          ? "Pronto! Link criado. Copie o link abaixo e grave na plaquinha."
+          : "Salvo. A plaquinha já usa as novas configurações, sem regravar.");
+      } else if (res.status === 401) status("Senha incorreta para este nome de link.");
+      else if (res.status === 429) status("Muitas tentativas erradas. Aguarde 15 minutos e tente de novo.");
+      else if (res.status === 503) status("O banco de dados ainda não foi conectado no Vercel. Veja o passo a passo no README.");
+      else if (res.status === 400) status("Algum dado é inválido. Confira os passos 1 a 4.");
+      else status("Salvar só funciona na página hospedada no Vercel, com o banco conectado.");
+    }, function () {
+      btn.disabled = false;
+      status("Salvar só funciona na página hospedada no Vercel, com o banco conectado.");
+    });
+  }
+
+  $("#setup").addEventListener("input", function () {
+    touched = true; fromForm(); persist(); refresh();
+  });
+  $("#slug").addEventListener("change", loadRemote);
+  $("#save").addEventListener("click", save);
+  $("#copy-link").addEventListener("click", function () {
+    var b = this, text = $("#link").textContent;
+    copyText(text).then(function (ok) {
+      flash(b, "Link copiado", "Selecione o link e copie", ok);
+      if (!ok) selectNode($("#link"));
+    });
+  });
+  $$(".tabs-m button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.body.dataset.view = b.dataset.view;
+      $$(".tabs-m button").forEach(function (x) { x.setAttribute("aria-selected", x === b ? "true" : "false"); });
+    });
+  });
+
+  document.body.dataset.view = "setup";
+  toForm();
+  refresh();
+  loadRemote();
+})();
+</script>
+
+</body>
+</html>
