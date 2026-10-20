@@ -24,11 +24,13 @@ valor e formato ficam salvos no banco e o lojista altera pelo painel quando quis
 
 ## Usar
 
-1. Abra `https://SEU-SITE.vercel.app/`.
+1. Abra `https://SEU-SITE.vercel.app/` (use o domínio de produção, em Settings → Domains na Vercel, e não os endereços `...-projects.vercel.app`).
 2. Preencha chave, recebedor, valor e formato.
 3. No passo 4 escolha o nome do link e uma senha (mínimo 6 caracteres) e clique em **Salvar configurações**.
-4. Copie o link e grave na plaquinha como **URL / Link** (NFC Tools ou NFC TagWriter, etiqueta NTAG213 ou NTAG215).
-5. Para mudar algo depois, abra o painel, digite o mesmo nome de link, confira que as configurações carregaram, altere, digite a senha e salve. A plaquinha não precisa ser regravada.
+4. O painel passa a mostrar um resumo da sua plaquinha, com o link pronto. Copie e grave na plaquinha como **URL / Link** (NFC Tools ou NFC TagWriter, etiqueta NTAG213 ou NTAG215).
+5. O aparelho lembra a loja: ao abrir o painel de novo, o resumo aparece direto, sem refazer nada. Os dados ficam travados.
+6. Para mudar algo, toque em **Alterar configurações**, edite, digite a senha do painel e salve. A plaquinha não precisa ser regravada.
+7. Em outro aparelho, use **Já configurou uma plaquinha?** no topo, digite o nome do link e toque em **Abrir**. Para trocar de loja num aparelho, use **Sair deste aparelho**.
 
 ## Segurança
 

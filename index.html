@@ -111,6 +111,10 @@ button { cursor: pointer; }
 .linkbox { font-family: var(--f-mono); font-size: 13px; padding: 12px; border-radius: 10px; background: var(--field); border: 1px dashed var(--line); overflow-wrap: anywhere; user-select: all; }
 .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 16px; font-weight: 600; }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.inline { display: flex; flex-wrap: wrap; gap: 10px; }
+.inline .input { flex: 1 1 200px; }
+#editor, #sum-body { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; font: inherit; cursor: pointer; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
 .how { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--ink-2); }
@@ -180,6 +184,43 @@ button { cursor: pointer; }
   </header>
 
   <section class="setup" id="setup" aria-label="Configuração do lojista">
+    <div class="block" id="login" hidden>
+      <h2>Já configurou uma plaquinha?</h2>
+      <div class="field">
+        <label class="lbl" for="login-slug">Nome do seu link</label>
+        <div class="inline">
+          <input class="input" id="login-slug" type="text" maxlength="30" autocomplete="off" spellcheck="false" placeholder="padaria-exemplo">
+          <button type="button" class="btn primary" id="login-go">Abrir</button>
+        </div>
+        <p class="hint" id="login-status" role="status">Primeira vez aqui? Preencha os passos abaixo.</p>
+      </div>
+    </div>
+
+    <div class="block" id="summary" hidden>
+      <h2>Sua plaquinha</h2>
+      <p class="hint" id="sum-load">Carregando a sua configuração...</p>
+      <div id="sum-body" class="setup-inner" hidden>
+        <p class="hint" id="sum-msg" role="status"></p>
+        <dl class="facts" id="sum-facts"></dl>
+        <p class="note host-warn" hidden>Atenção: você abriu um endereço temporário de deploy. Ele muda a cada atualização e a Vercel pode pedir login de quem abrir. Abra o painel pelo domínio de produção (na Vercel: Settings → Domains) antes de copiar o link.</p>
+        <p class="lbl">Link para gravar na plaquinha</p>
+        <div class="linkbox" id="sum-link"></div>
+        <div class="actions">
+          <button type="button" class="btn primary" id="sum-copy">Copiar link</button>
+          <button type="button" class="btn" id="sum-preview">Ver como cliente</button>
+          <button type="button" class="btn" id="sum-edit">Alterar configurações</button>
+        </div>
+        <ol class="how">
+          <li>No celular, abra um app de gravação NFC (NFC Tools ou NFC TagWriter).</li>
+          <li>Grave o link como <b>URL / Link</b> em uma etiqueta NTAG213 ou NTAG215.</li>
+          <li>Encoste o celular na plaquinha para testar.</li>
+        </ol>
+        <p class="hint">Os dados ficam travados neste aparelho. Para alterar, toque em "Alterar configurações" e informe a senha do painel ao salvar.</p>
+        <p class="hint"><button type="button" class="linkbtn" id="sum-exit">Esta não é a sua loja? Sair deste aparelho</button></p>
+      </div>
+    </div>
+
+    <div id="editor">
     <div class="block">
       <h2><b>1</b>Chave Pix que vai na plaquinha</h2>
       <div class="chips" role="radiogroup" aria-label="Tipo de chave">
@@ -251,9 +292,9 @@ button { cursor: pointer; }
           <input class="input" id="pass" type="password" autocomplete="current-password">
         </div>
       </div>
-      <div class="actions"><button type="button" class="btn primary" id="save">Salvar configurações</button><button type="button" class="btn" id="open-preview-2">Ver como cliente</button></div>
+      <div class="actions"><button type="button" class="btn primary" id="save">Salvar configurações</button><button type="button" class="btn" id="open-preview-2">Ver como cliente</button><button type="button" class="btn" id="cancel-edit" hidden>Cancelar</button></div>
       <p class="hint" id="save-status" role="status" aria-live="polite">Primeiro acesso: escolha um nome e uma senha. Para alterar depois, digite o mesmo nome e a mesma senha.</p>
-      <p class="note" id="host-warn" hidden>Atenção: você abriu um endereço temporário de deploy. Ele muda a cada atualização e a Vercel pode pedir login de quem abrir. Abra o painel pelo domínio de produção (na Vercel: Settings → Domains) antes de copiar o link.</p>
+      <p class="note host-warn" hidden>Atenção: você abriu um endereço temporário de deploy. Ele muda a cada atualização e a Vercel pode pedir login de quem abrir. Abra o painel pelo domínio de produção (na Vercel: Settings → Domains) antes de copiar o link.</p>
       <p class="hint">Este é o link que você grava na plaquinha. Ele não muda quando você altera chave, valor ou formato. Depois de hospedar no Vercel, o endereço real do seu site aparece aqui sozinho.</p>
       <div class="linkbox" id="link" aria-live="polite"></div>
       <div><button type="button" class="btn" id="copy-link">Copiar link</button></div>
@@ -262,6 +303,7 @@ button { cursor: pointer; }
         <li>No celular, abra um app de gravação NFC (NFC Tools ou NFC TagWriter).</li>
         <li>Grave como <b>URL / Link</b> em uma etiqueta NTAG213 ou NTAG215 e encoste o celular para testar.</li>
       </ol>
+    </div>
     </div>
   </section>
   <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Como o cliente vê" hidden>
@@ -597,10 +639,10 @@ button { cursor: pointer; }
   var DEFAULT = { type: "email", key: "", estab: "", name: "", city: "", mode: "open", amount: "", show: "both", msg: "" };
   var SAMPLE = { type: "email", key: "pix@exemplo.com", estab: "Padaria Exemplo", name: "João da Silva", city: "São Paulo", mode: "open", amount: "", show: "both", msg: "" };
   var STORE = "pix-plaquinha-v2";
-  var model = Object.assign({}, DEFAULT), slug = "";
+  var model = Object.assign({}, DEFAULT), slug = "", linked = false, hasRemote = false;
   try {
     var saved = JSON.parse(localStorage.getItem(STORE) || "null");
-    if (saved && saved.model) { model = Object.assign({}, DEFAULT, saved.model); slug = saved.slug || ""; }
+    if (saved && saved.model) { model = Object.assign({}, DEFAULT, saved.model); slug = saved.slug || ""; linked = !!saved.linked; }
   } catch (e) {}
 
   function radio(name) { var el = $('input[name="' + name + '"]:checked'); return el ? el.value : ""; }
@@ -620,7 +662,7 @@ button { cursor: pointer; }
     if ($("#slug").value !== slug) $("#slug").value = slug;
   }
   function persist() {
-    try { localStorage.setItem(STORE, JSON.stringify({ model: model, slug: slug })); } catch (e) {}
+    try { localStorage.setItem(STORE, JSON.stringify({ model: model, slug: slug, linked: linked })); } catch (e) {}
   }
   function hint(id, text) { var el = $("#" + id); el.hidden = !text; el.textContent = text || ""; }
   function status(text) { $("#save-status").textContent = text; }
@@ -638,7 +680,8 @@ button { cursor: pointer; }
     $("#link").textContent = baseUrl() + "?l=" + (slugOk ? slug : "nome-do-seu-link");
     $("#copy-link").disabled = !slugOk;
     var host = ""; try { host = window.location.hostname; } catch (e) {}
-    $("#host-warn").hidden = !/-projects\.vercel\.app$/i.test(host);
+    $$(".host-warn").forEach(function (el) { el.hidden = !/-projects\.vercel\.app$/i.test(host); });
+    $("#sum-link").textContent = $("#link").textContent;
     if (!$("#modal").hidden) renderPreview();
   }
 
@@ -664,19 +707,49 @@ button { cursor: pointer; }
     if (opener) opener.focus();
   }
 
-  function loadRemote() {
-    if (!SLUG_RE.test(slug)) return;
-    var asked = slug;
-    api("GET", asked).then(function (res) {
-      if (asked !== slug) return;
+  var SHOW_LABEL = { both: "Copia e cola + QR Code", code: "Só copia e cola", qr: "Só QR Code" };
+  function renderSummary() {
+    var r = resolve(model);
+    if (!r.ok) return false;
+    var d = r.data;
+    var rows = [
+      ["Estabelecimento", d.estab, ""], ["Recebedor", d.name, ""],
+      ["Chave Pix · " + d.typeLabel, d.keyDisplay, "mono"], ["Cidade", d.city, ""],
+      ["Valor", d.fixed ? BRL.format(d.fixed) + " (fixo)" : "O cliente digita", ""],
+      ["Formato", SHOW_LABEL[d.show] || "", ""]
+    ];
+    if (d.msg) rows.push(["Mensagem no Pix", d.msg, ""]);
+    $("#sum-facts").innerHTML = rows.map(function (x) {
+      return '<div><dt>' + esc(x[0]) + '</dt><dd class="' + x[2] + '">' + esc(x[1]) + '</dd></div>';
+    }).join("");
+    return true;
+  }
+
+  function setView(v) {
+    $("#login").hidden = v !== "login";
+    $("#summary").hidden = v !== "summary" && v !== "loading";
+    $("#sum-load").hidden = v !== "loading";
+    $("#sum-body").hidden = v !== "summary";
+    $("#editor").hidden = v !== "login" && v !== "edit";
+    $("#cancel-edit").hidden = !(v === "edit" && hasRemote);
+    $("#slug").readOnly = v === "edit" && hasRemote;
+  }
+
+  // Carrega a configuração salva no servidor e mostra o resumo travado.
+  function enter(name, onFail) {
+    api("GET", name).then(function (res) {
       if (res.status === 200 && res.body.config) {
-        model = Object.assign({}, DEFAULT, res.body.config);
+        slug = name; model = Object.assign({}, DEFAULT, res.body.config);
+        linked = true; hasRemote = true;
         toForm(); persist(); refresh();
-        status("Configurações deste link carregadas. Para alterar, digite a senha e salve.");
+        if (renderSummary()) { $("#sum-msg").textContent = ""; setView("summary"); }
+        else { status("Os dados salvos estão incompletos. Complete e salve de novo."); setView("edit"); }
       } else if (res.status === 404) {
-        status("Este nome está livre. Preencha os passos 1 a 3, escolha uma senha e salve.");
+        onFail("Não encontrei esse nome de link. Confira se digitou igual.");
+      } else {
+        onFail("Não foi possível carregar agora. Tente de novo.");
       }
-    }, function () {});
+    }, function () { onFail("Sem conexão com o servidor. Tente de novo."); });
   }
 
   function save() {
@@ -684,15 +757,18 @@ button { cursor: pointer; }
     var r = resolve(model), pass = $("#pass").value;
     if (!r.ok) { status("Complete os passos 1 a 3 antes de salvar."); refresh(); return; }
     if (!SLUG_RE.test(slug)) { status("Escolha o nome do seu link."); refresh(); return; }
-    if (pass.length < 6) { status("A senha precisa ter pelo menos 6 caracteres."); return; }
+    if (pass.length < 6) { status("Digite a senha do painel (mínimo 6 caracteres)."); return; }
     var btn = $("#save"); btn.disabled = true; status("Salvando...");
     api("POST", slug, { slug: slug, pass: pass, config: model }).then(function (res) {
       btn.disabled = false;
       if (res.status === 200) {
-        persist();
-        status(res.body.created
-          ? "Pronto! Link criado. Copie o link abaixo e grave na plaquinha."
-          : "Salvo. A plaquinha já usa as novas configurações, sem regravar.");
+        linked = true; hasRemote = true; persist();
+        $("#pass").value = "";
+        refresh(); renderSummary(); setView("summary");
+        $("#sum-msg").textContent = res.body.created
+          ? "Pronto! Link criado. Copie o link e grave na plaquinha."
+          : "Salvo. A plaquinha já usa as novas configurações, sem regravar.";
+        window.scrollTo(0, 0);
       } else if (res.status === 401) status("Senha incorreta para este nome de link.");
       else if (res.status === 429) status("Muitas tentativas erradas. Aguarde 15 minutos e tente de novo.");
       else if (res.status === 503) status("O banco de dados ainda não foi conectado no Vercel. Veja o passo a passo no README.");
@@ -704,19 +780,39 @@ button { cursor: pointer; }
     });
   }
 
-  $("#setup").addEventListener("input", function () {
-    fromForm(); persist(); refresh();
+  function leaveDevice() {
+    linked = false; hasRemote = false; slug = ""; model = Object.assign({}, DEFAULT);
+    try { localStorage.removeItem(STORE); } catch (e) {}
+    $("#pass").value = ""; $("#login-slug").value = "";
+    toForm(); refresh();
+    $("#login-status").textContent = "Primeira vez aqui? Preencha os passos abaixo.";
+    status("Primeiro acesso: escolha um nome e uma senha. Para alterar depois, digite o mesmo nome e a mesma senha.");
+    setView("login");
+    window.scrollTo(0, 0);
+  }
+
+  // Formulário novo: avisa se o nome escolhido já existe.
+  $("#slug").addEventListener("change", function () {
+    if (hasRemote || !SLUG_RE.test(slug)) return;
+    var asked = slug;
+    api("GET", asked).then(function (res) {
+      if (asked !== slug) return;
+      if (res.status === 200) status("Este nome já está em uso. Se for a sua plaquinha, use \"Já configurou uma plaquinha?\" no topo. Se não, escolha outro nome.");
+      else if (res.status === 404) status("Este nome está livre. Preencha os passos 1 a 3, escolha uma senha e salve.");
+    }, function () {});
   });
-  $("#slug").addEventListener("change", loadRemote);
+
+  $("#editor").addEventListener("input", function () { fromForm(); persist(); refresh(); });
   $("#save").addEventListener("click", save);
-  $("#copy-link").addEventListener("click", function () {
-    var b = this, text = $("#link").textContent;
-    copyText(text).then(function (ok) {
-      flash(b, "Link copiado", "Selecione o link e copie", ok);
-      if (!ok) selectNode($("#link"));
+  function copyLink(btn, from) {
+    copyText($(from).textContent).then(function (ok) {
+      flash(btn, "Link copiado", "Selecione o link e copie", ok);
+      if (!ok) selectNode($(from));
     });
-  });
-  ["open-preview", "open-preview-2"].forEach(function (id) {
+  }
+  $("#copy-link").addEventListener("click", function () { copyLink(this, "#link"); });
+  $("#sum-copy").addEventListener("click", function () { copyLink(this, "#sum-link"); });
+  ["open-preview", "open-preview-2", "sum-preview"].forEach(function (id) {
     var b = $("#" + id);
     b.addEventListener("click", function () { openPreview(b); });
   });
@@ -724,9 +820,40 @@ button { cursor: pointer; }
   $("#modal").addEventListener("click", function (e) { if (e.target === this) closePreview(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("#modal").hidden) closePreview(); });
 
+  $("#login-go").addEventListener("click", function () {
+    var name = $("#login-slug").value.trim().toLowerCase().replace(/\s+/g, "-");
+    $("#login-slug").value = name;
+    if (!SLUG_RE.test(name)) { $("#login-status").textContent = "Use de 3 a 30 letras minúsculas, números ou hífen."; return; }
+    $("#login-status").textContent = "Procurando...";
+    enter(name, function (msg) { $("#login-status").textContent = msg; });
+  });
+  $("#login-slug").addEventListener("keydown", function (e) { if (e.key === "Enter") $("#login-go").click(); });
+
+  $("#sum-edit").addEventListener("click", function () {
+    $("#pass").value = "";
+    status("Altere o que precisar. Para salvar, digite a senha do painel.");
+    setView("edit");
+    window.scrollTo(0, 0);
+  });
+  $("#cancel-edit").addEventListener("click", function () {
+    setView("loading");
+    enter(slug, function (msg) { setView("edit"); status(msg); });
+  });
+  $("#sum-exit").addEventListener("click", leaveDevice);
+
   toForm();
   refresh();
-  loadRemote();
+  if (linked && SLUG_RE.test(slug)) {
+    setView("loading");
+    enter(slug, function (msg) {
+      linked = false; hasRemote = false; persist();
+      $("#login-slug").value = slug;
+      setView("login");
+      $("#login-status").textContent = msg;
+    });
+  } else {
+    setView("login");
+  }
 })();
 </script>
 
