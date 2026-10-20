@@ -253,6 +253,7 @@ button { cursor: pointer; }
       </div>
       <div class="actions"><button type="button" class="btn primary" id="save">Salvar configurações</button><button type="button" class="btn" id="open-preview-2">Ver como cliente</button></div>
       <p class="hint" id="save-status" role="status" aria-live="polite">Primeiro acesso: escolha um nome e uma senha. Para alterar depois, digite o mesmo nome e a mesma senha.</p>
+      <p class="note" id="host-warn" hidden>Atenção: você abriu um endereço temporário de deploy. Ele muda a cada atualização e a Vercel pode pedir login de quem abrir. Abra o painel pelo domínio de produção (na Vercel: Settings → Domains) antes de copiar o link.</p>
       <p class="hint">Este é o link que você grava na plaquinha. Ele não muda quando você altera chave, valor ou formato. Depois de hospedar no Vercel, o endereço real do seu site aparece aqui sozinho.</p>
       <div class="linkbox" id="link" aria-live="polite"></div>
       <div><button type="button" class="btn" id="copy-link">Copiar link</button></div>
@@ -636,6 +637,8 @@ button { cursor: pointer; }
     hint("slug-hint", slug && !slugOk ? "Use de 3 a 30 letras minúsculas, números ou hífen, sem começar nem terminar com hífen." : "");
     $("#link").textContent = baseUrl() + "?l=" + (slugOk ? slug : "nome-do-seu-link");
     $("#copy-link").disabled = !slugOk;
+    var host = ""; try { host = window.location.hostname; } catch (e) {}
+    $("#host-warn").hidden = !/-projects\.vercel\.app$/i.test(host);
     if (!$("#modal").hidden) renderPreview();
   }
 
